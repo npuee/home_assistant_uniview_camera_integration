@@ -1,4 +1,3 @@
-# NPU config
 command_line:
   - switch:
       name: CCTV Detection
