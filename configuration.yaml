@@ -1,0 +1,10 @@
+# NPU config
+command_line:
+  - switch:
+      name: CCTV Detection
+      unique_id: "56e32b77-37cc-489b-894e-c28041767037"
+        #      scan_interval: 45  
+      icon: mdi:cctv
+      command_on: python3 /config/scripts/cctv/unv_nvr.py on
+      command_off: python3 /config/scripts/cctv/unv_nvr.py off
+      command_state: python3 /config/scripts/cctv/unv_nvr.py status
