@@ -12,7 +12,7 @@ start_time = time.time() # measure runtime
 
 #Device setting:
 cctv={
-    "user" : "useranme",
+    "user" : "useraname",
     "password" : "password",
     "timeout" : 10,
     "cameras": {
