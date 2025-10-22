@@ -1,4 +1,4 @@
-Multithreaded python script to turn on/off Unioview cameras intelegent detection.
+Multithreaded python script to turn on/off Uniview cameras intelegent detection.
 
 Reason: I have a lot of Uniview cameras that have "intellegent" motion/intrudion detection bot no easy way to switch it of or on.
 It's annoying when camera flashes everytime someone is outside.
