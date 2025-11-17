@@ -8,3 +8,7 @@ Setup "intelligent" detection rule on cameras.
 Add script to home assistant and you have a pretty button to switch detection off or on.
 
 
+If debug output is needed ala how many cameras have detection on/off change yml:
+python3 /config/scripts/cctv/unv_nvr.py status -> python3 /config/scripts/cctv/unv_nvr.py status debug
+
+
