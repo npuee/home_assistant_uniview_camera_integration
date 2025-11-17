@@ -109,13 +109,13 @@ if function_to_run == "status":
     enabled_count = sum(results)
     total_cameras = len(cctv["cameras"])
     runtime = round((time.time() - start_time), 2)  
-    if enabled_count == 0:
+    if enabled_count == 0: # All off
         if debug: print(f"Status: {enabled_count}/{total_cameras} cameras enabled. Runtime: {runtime} second.")
         exit(1)
-    elif 0 < enabled_count < total_cameras:
+    elif enabled_count < total_cameras: # Partial on
         print(f"Status: {enabled_count}/{total_cameras} cameras enabled (partial). Runtime: {runtime} second.")
         exit(0)
-    else:
+    elif enabled_count == total_cameras: # All on
         if debug: print(f"Status: {enabled_count}/{total_cameras} cameras enabled (all on). Runtime: {runtime} second.")
         exit(0)
 
@@ -125,10 +125,6 @@ if function_to_run == "status":
 #
 if function_to_run in ("on", "off"):
     # Set detection based on payload
-    results = pool.map(switch_detection, cctv["cameras"])
-    status_changed_count = sum(results)
+    results = sum(pool.map(switch_detection, cctv["cameras"]))
     # Print results
-    print(f"Set detection {function_to_run} on {status_changed_count}/{len(cctv["cameras"])} cameras. Runtime: {round((time.time() - start_time), 2)} second.")
-
-
-
+    print(f"Set detection {function_to_run} on {results}/{len(cctv["cameras"])} cameras. Runtime: {round((time.time() - start_time), 2)} second.")
