@@ -26,7 +26,6 @@ cctv={
             },   
     }
 }
-
 #
 #
 # DO NOT EDIT BELOW
@@ -88,7 +87,13 @@ def switch_detection(camera):
 
     # Set camera detection rule status
     camera_query = requests.put(camera_url,  data=json.dumps(payload), auth=HTTPDigestAuth(camera_user, camera_password), timeout=cctv["timeout"])
-    return camera_query.json()
+    # Return result
+    camera_result = camera_query.json()
+    camera_result = camera_result["Response"]["ResponseString"]
+    if camera_result == "Succeed":
+        return 1
+    else:
+        return 0
 
 
 
@@ -115,10 +120,9 @@ if function_to_run == "status":
 #
 if function_to_run in ("on", "off"):
     # Set detection based on payload
-    result_blob = pool.map(switch_detection, cctv["cameras"])
+    results = pool.map(switch_detection, cctv["cameras"])
+    status_changed_count = sum(results)
     # Print results
-    temp = 0
-    for item in result_blob:
-        if isinstance(item, dict) and item.get("Response", {}).get("ResponseString") == "Succeed":
-            temp += 1
-    print(f"Set detection {function_to_run} on {temp}/{len(cctv["cameras"])} cameras. Runtime: {round((time.time() - start_time), 2)} second.")
+    print(f"Set detection {function_to_run} on {status_changed_count}/{len(cctv["cameras"])} cameras. Runtime: {round((time.time() - start_time), 2)} second.")
+
+
