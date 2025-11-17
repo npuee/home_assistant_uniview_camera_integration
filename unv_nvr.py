@@ -41,8 +41,7 @@ from fastapi import APIRouter, FastAPI, Header, Request, HTTPException
 
 
 # Static nvr urls
-nrv_prefix = "/LAPI/V1.0/Channels"
-nrv_middle = "Smart"
+camera_prefix = "/LAPI/V1.0/Smart/"
 
 #Params
 function_to_run = sys.argv[1]
@@ -60,7 +59,7 @@ else:
 # 
 def detection_status(camera):
     # Combine url
-    camera_url = "http://" + camera + "/LAPI/V1.0/Smart/" + cctv["cameras"][camera]["rule"] + "/Rule"
+    camera_url = "http://" + camera + camera_prefix + cctv["cameras"][camera]["rule"] + "/Rule"
     # get camera detection rule status
 
     try:
@@ -88,13 +87,10 @@ if function_to_run == "status":
         #print(f"Status: {enabled_count}/{total_cameras} cameras enabled (all on). Runtime: {runtime} second.")
         exit(0)
 
-
-
-
 # Set camera detection status
 def switch_detection(camera):
     # Combine url
-    camera_url = "http://" + camera + "/LAPI/V1.0/Smart/" + cctv["cameras"][camera]["rule"] + "/Rule"
+    camera_url = "http://" + camera + camera_prefix + cctv["cameras"][camera]["rule"] + "/Rule"
     # Set camera detection rule status
     camera_query = requests.put(camera_url,  data=json.dumps(payload), auth=HTTPDigestAuth(cctv["user"], cctv["password"]), timeout=cctv["timeout"])
     return camera_query.json()
