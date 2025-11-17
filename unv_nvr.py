@@ -11,7 +11,6 @@ start_time = time.time() # measure runtime
 
 #Device setting:
 cctv={
-    "debug" : False,
     "timeout" : 10,
     "cameras": {
         "camera_ip" : {
@@ -26,6 +25,7 @@ cctv={
             },   
     }
 }
+
 
 
 
@@ -55,6 +55,13 @@ camera_prefix = "/LAPI/V1.0/Smart/"
 #Params
 function_to_run = sys.argv[1]
 pool = ThreadPool(len(cctv["cameras"])) # Multithreading pool
+# Debug mode
+debug = False
+try:
+    if sys.argv[2]  == "debug":
+        debug = True
+except:
+    debug = False
 
 
 # Set payload for camera detection ON or OFF        
@@ -111,13 +118,13 @@ if function_to_run == "status":
     runtime = round((time.time() - start_time), 2)
 
     if enabled_count == 0:
-        if cctv["debug"]: print(f"Status: {enabled_count}/{total_cameras} cameras enabled. Runtime: {runtime} second.")
+        if debug: print(f"Status: {enabled_count}/{total_cameras} cameras enabled. Runtime: {runtime} second.")
         exit(1)
     elif 0 < enabled_count < total_cameras:
         print(f"Status: {enabled_count}/{total_cameras} cameras enabled (partial). Runtime: {runtime} second.")
         exit(0)
     else:
-        if cctv["debug"]:  print(f"Status: {enabled_count}/{total_cameras} cameras enabled (all on). Runtime: {runtime} second.")
+        if debug:  print(f"Status: {enabled_count}/{total_cameras} cameras enabled (all on). Runtime: {runtime} second.")
         exit(0)
 
 
