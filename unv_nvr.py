@@ -21,6 +21,7 @@ cctv={
     }
 }
 
+
 #
 #
 # DO NOT EDIT BELOW
@@ -45,7 +46,7 @@ camera_prefix = "/LAPI/V1.0/Smart/"
 
 #Params
 function_to_run = sys.argv[1]
-pool = ThreadPool(8)
+pool = ThreadPool(len(cctv["cameras"])) # Multithreading pool
 
 
 # Set payload for camera detection ON or OFF        
@@ -69,6 +70,17 @@ def detection_status(camera):
     except:
         print("Camera %s timeout!" % camera)
         return 0
+#
+# Set camera detection status
+#
+def switch_detection(camera):
+    # Combine url
+    camera_url = "http://" + camera + camera_prefix + cctv["cameras"][camera]["rule"] + "/Rule"
+    # Set camera detection rule status
+    camera_query = requests.put(camera_url,  data=json.dumps(payload), auth=HTTPDigestAuth(cctv["user"], cctv["password"]), timeout=cctv["timeout"])
+    return camera_query.json()
+
+
 
 # Get camera detection status
 if function_to_run == "status":
@@ -87,16 +99,16 @@ if function_to_run == "status":
         #print(f"Status: {enabled_count}/{total_cameras} cameras enabled (all on). Runtime: {runtime} second.")
         exit(0)
 
+
+#
 # Set camera detection status
-def switch_detection(camera):
-    # Combine url
-    camera_url = "http://" + camera + camera_prefix + cctv["cameras"][camera]["rule"] + "/Rule"
-    # Set camera detection rule status
-    camera_query = requests.put(camera_url,  data=json.dumps(payload), auth=HTTPDigestAuth(cctv["user"], cctv["password"]), timeout=cctv["timeout"])
-    return camera_query.json()
-
-
-
-# Set detection based on payload
-pool.map(switch_detection, cctv["cameras"])
-print("NVR status change runtime: %s second." % round((time.time() - start_time), 2))
+#
+if function_to_run in ("on", "off"):
+    # Set detection based on payload
+    result_blob = pool.map(switch_detection, cctv["cameras"])
+    # Print results
+    temp = 0
+    for item in result_blob:
+        if isinstance(item, dict) and item.get("Response", {}).get("ResponseString") == "Succeed":
+            temp += 1
+    print(f"Set detection {function_to_run} on {temp}/{len(cctv["cameras"])} cameras. Runtime: {round((time.time() - start_time), 2)} second.")
