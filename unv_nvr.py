@@ -9,7 +9,7 @@ import time
 start_time = time.time() # measure runtime
 
 
-#Device setting:
+#Camera setting:
 cctv={
     "timeout" : 10,
     "cameras": {
@@ -25,9 +25,6 @@ cctv={
             },   
     }
 }
-
-
-
 
 
 #
@@ -47,9 +44,7 @@ def import_with_auto_install(package):
 import_with_auto_install('fastapi')
 from fastapi import APIRouter, FastAPI, Header, Request, HTTPException
 
-
-
-# Static nvr urls
+# Static camera prefixes
 camera_prefix = "/LAPI/V1.0/Smart/"
 
 #Params
@@ -64,7 +59,7 @@ except:
     debug = False
 
 
-# Set payload for camera detection ON or OFF        
+# Set payload for camera detection ON or OFF         
 if function_to_run == "off":
     payload = {"Enabled": 0}
 else:
@@ -78,7 +73,6 @@ def detection_status(camera):
     camera_url = "http://" + camera + camera_prefix + cctv["cameras"][camera]["rule"] + "/Rule"
     camera_user = cctv["cameras"][camera]["user"]
     camera_password = cctv["cameras"][camera]["password"]
-
     # get camera detection rule status
     try:
         camera_query = requests.get(camera_url, auth=HTTPDigestAuth(camera_user, camera_password), timeout=cctv["timeout"])
@@ -97,7 +91,7 @@ def switch_detection(camera):
     camera_password = cctv["cameras"][camera]["password"]
     # Change detection rule:
     try:
-    # Set camera detection rule status
+        # Set camera detection rule status
         camera_query = requests.put(camera_url,  data=json.dumps(payload), auth=HTTPDigestAuth(camera_user, camera_password), timeout=cctv["timeout"])
         camera_result = camera_query.json()
         camera_result = camera_result["Response"]["ResponseString"]   
@@ -109,14 +103,12 @@ def switch_detection(camera):
         print("Camera %s timeout!" % camera)
         return 0
 
-
 # Get camera detection status
 if function_to_run == "status":
     results = pool.map(detection_status, cctv["cameras"])
     enabled_count = sum(results)
     total_cameras = len(cctv["cameras"])
-    runtime = round((time.time() - start_time), 2)
-
+    runtime = round((time.time() - start_time), 2)  
     if enabled_count == 0:
         if debug: print(f"Status: {enabled_count}/{total_cameras} cameras enabled. Runtime: {runtime} second.")
         exit(1)
@@ -124,7 +116,7 @@ if function_to_run == "status":
         print(f"Status: {enabled_count}/{total_cameras} cameras enabled (partial). Runtime: {runtime} second.")
         exit(0)
     else:
-        if debug:  print(f"Status: {enabled_count}/{total_cameras} cameras enabled (all on). Runtime: {runtime} second.")
+        if debug: print(f"Status: {enabled_count}/{total_cameras} cameras enabled (all on). Runtime: {runtime} second.")
         exit(0)
 
 
