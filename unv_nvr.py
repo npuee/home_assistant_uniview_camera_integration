@@ -26,6 +26,10 @@ cctv={
             },   
     }
 }
+
+
+
+
 #
 #
 # DO NOT EDIT BELOW
@@ -84,17 +88,19 @@ def switch_detection(camera):
     camera_url = "http://" + camera + camera_prefix + cctv["cameras"][camera]["rule"] + "/Rule"
     camera_user = cctv["cameras"][camera]["user"]
     camera_password = cctv["cameras"][camera]["password"]
-
+    # Change detection rule:
+    try:
     # Set camera detection rule status
-    camera_query = requests.put(camera_url,  data=json.dumps(payload), auth=HTTPDigestAuth(camera_user, camera_password), timeout=cctv["timeout"])
-    # Return result
-    camera_result = camera_query.json()
-    camera_result = camera_result["Response"]["ResponseString"]
-    if camera_result == "Succeed":
-        return 1
-    else:
+        camera_query = requests.put(camera_url,  data=json.dumps(payload), auth=HTTPDigestAuth(camera_user, camera_password), timeout=cctv["timeout"])
+        camera_result = camera_query.json()
+        camera_result = camera_result["Response"]["ResponseString"]   
+        if camera_result == "Succeed":
+            return 1
+        else:
+            return 0
+    except: # Timeout or other error
+        print("Camera %s timeout!" % camera)
         return 0
-
 
 
 # Get camera detection status
@@ -124,5 +130,6 @@ if function_to_run in ("on", "off"):
     status_changed_count = sum(results)
     # Print results
     print(f"Set detection {function_to_run} on {status_changed_count}/{len(cctv["cameras"])} cameras. Runtime: {round((time.time() - start_time), 2)} second.")
+
 
 
