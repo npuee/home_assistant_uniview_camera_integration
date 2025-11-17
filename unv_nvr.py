@@ -5,22 +5,27 @@ import requests
 from requests.auth import HTTPDigestAuth # NVR Digest auth
 from multiprocessing.dummy import Pool as ThreadPool # Multicore fastapi requests
 import pip # Runtime install fastapi, if not installed 
-import socket # To check if nvr port 80 is reachable.
 import time
 start_time = time.time() # measure runtime
 
 
 #Device setting:
 cctv={
-    "user" : "username",
-    "password" : "password",
+    "debug" : False,
     "timeout" : 10,
     "cameras": {
-        "camera_ip" : {"rule" : "IntrusionDetection"},
-        "camera_ip" : {"rule" : "IntrusionDetection"},
+        "camera_ip" : {
+            "rule" : "IntrusionDetection",
+            "user" : "camera user",
+            "password" : "camera password"
+            },
+        "camera_ip" : {
+            "rule" : "IntrusionDetection",
+            "user" : "camera user",
+            "password" : "camera password"
+            },   
     }
 }
-
 
 #
 #
@@ -59,12 +64,14 @@ else:
 # Get camera detection status
 # 
 def detection_status(camera):
-    # Combine url
+    # Camera settings
     camera_url = "http://" + camera + camera_prefix + cctv["cameras"][camera]["rule"] + "/Rule"
-    # get camera detection rule status
+    camera_user = cctv["cameras"][camera]["user"]
+    camera_password = cctv["cameras"][camera]["password"]
 
+    # get camera detection rule status
     try:
-        camera_query = requests.get(camera_url, auth=HTTPDigestAuth(cctv["user"], cctv["password"]), timeout=cctv["timeout"])
+        camera_query = requests.get(camera_url, auth=HTTPDigestAuth(camera_user, camera_password), timeout=cctv["timeout"])
         camera_result = camera_query.json()
         return  camera_result["Response"]["Data"]["Enabled"]   
     except:
@@ -74,10 +81,13 @@ def detection_status(camera):
 # Set camera detection status
 #
 def switch_detection(camera):
-    # Combine url
+    # Camera settings
     camera_url = "http://" + camera + camera_prefix + cctv["cameras"][camera]["rule"] + "/Rule"
+    camera_user = cctv["cameras"][camera]["user"]
+    camera_password = cctv["cameras"][camera]["password"]
+
     # Set camera detection rule status
-    camera_query = requests.put(camera_url,  data=json.dumps(payload), auth=HTTPDigestAuth(cctv["user"], cctv["password"]), timeout=cctv["timeout"])
+    camera_query = requests.put(camera_url,  data=json.dumps(payload), auth=HTTPDigestAuth(camera_user, camera_password), timeout=cctv["timeout"])
     return camera_query.json()
 
 
@@ -90,13 +100,13 @@ if function_to_run == "status":
     runtime = round((time.time() - start_time), 2)
 
     if enabled_count == 0:
-        #print(f"Status: {enabled_count}/{total_cameras} cameras enabled. Runtime: {runtime} second.")
+        if cctv["debug"]: print(f"Status: {enabled_count}/{total_cameras} cameras enabled. Runtime: {runtime} second.")
         exit(1)
     elif 0 < enabled_count < total_cameras:
         print(f"Status: {enabled_count}/{total_cameras} cameras enabled (partial). Runtime: {runtime} second.")
         exit(0)
     else:
-        #print(f"Status: {enabled_count}/{total_cameras} cameras enabled (all on). Runtime: {runtime} second.")
+        if cctv["debug"]:  print(f"Status: {enabled_count}/{total_cameras} cameras enabled (all on). Runtime: {runtime} second.")
         exit(0)
 
 
